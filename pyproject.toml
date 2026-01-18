@@ -23,7 +23,7 @@ packages = [
 
 [tool.poetry.dependencies]
 python = "^3.9"
-pybtex = "^0.24.0"
+pybtex = "^0"
 
 [tool.poetry.dev-dependencies]
 
