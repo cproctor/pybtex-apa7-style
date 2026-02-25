@@ -259,6 +259,7 @@ class APAStyle(BaseStyle):
                     field('publisher'),
                 ],
                 sentence[optional_field('note')],
+                self.format_web_refs(e),
             ]
         else:
             return toplevel[
@@ -276,6 +277,7 @@ class APAStyle(BaseStyle):
                     field('publisher'),
                 ],
                 sentence[optional_field('note')],
+                self.format_web_refs(e),
             ]
 
     def get_booklet_template(self, e):
@@ -286,6 +288,7 @@ class APAStyle(BaseStyle):
                 self.format_title(e, 'title'),
                 sentence[optional_field('address')],
                 sentence[optional_field('note')],
+                self.format_web_refs(e),
             ]
         else:
             return toplevel[
@@ -293,6 +296,7 @@ class APAStyle(BaseStyle):
                 self.format_date(e),
                 sentence[optional_field('address')],
                 sentence[optional_field('note')],
+                self.format_web_refs(e),
             ]
 
     def get_inbook_template(self, e):
@@ -321,6 +325,7 @@ class APAStyle(BaseStyle):
                     field('publisher'),
                 ],
                 sentence[optional_field('note')],
+                self.format_web_refs(e),
             ]
         else:
             return toplevel[
@@ -345,6 +350,7 @@ class APAStyle(BaseStyle):
                     field('publisher'),
                 ],
                 sentence[optional_field('note')],
+                self.format_web_refs(e),
             ]
 
     
@@ -361,6 +367,7 @@ class APAStyle(BaseStyle):
                     optional_field('publisher'),
                 ],
                 sentence[optional_field('note')],
+                self.format_web_refs(e),
             ]
         else:
             return toplevel[
@@ -374,6 +381,7 @@ class APAStyle(BaseStyle):
                     optional_field('publisher'),
                 ],
                 sentence[optional_field('note')],
+                self.format_web_refs(e),
             ]
 
     def get_inproceedings_template(self, e):
@@ -435,6 +443,7 @@ class APAStyle(BaseStyle):
                 optional_field('address'),
             ],
             sentence[optional_field('note')],
+            self.format_web_refs(e),
         ]
 
     def get_misc_template(self, e):
@@ -444,12 +453,14 @@ class APAStyle(BaseStyle):
                 self.format_date(e),
                 optional[self.format_btitle(e, 'title')],
                 sentence[optional_field('note')],
+                self.format_web_refs(e),
             ]
         else:
             return toplevel[
                 optional[self.format_btitle(e, 'title')],
                 self.format_date(e),
                 sentence[optional_field('note')],
+                self.format_web_refs(e),
             ]
 
     def get_phdthesis_template(self, e):
@@ -467,6 +478,7 @@ class APAStyle(BaseStyle):
                 optional_field('address'),
             ],
             sentence[optional_field('note')],
+            self.format_web_refs(e),
         ]
 
     def get_proceedings_template(self, e):
@@ -477,6 +489,7 @@ class APAStyle(BaseStyle):
                 self.format_btitle(e, 'title'),
                 sentence[optional_field('publisher')],
                 sentence[optional_field('note')],
+                self.format_web_refs(e),
             ]
         else:
             return toplevel[
@@ -484,6 +497,7 @@ class APAStyle(BaseStyle):
                 self.format_date(e),
                 sentence[optional_field('publisher')],
                 sentence[optional_field('note')],
+                self.format_web_refs(e),
             ]
 
     def get_techreport_template(self, e):
@@ -494,6 +508,7 @@ class APAStyle(BaseStyle):
                 self.format_btitle(e, 'title'),
                 sentence[field('institution')],
                 sentence[optional_field('note')],
+                self.format_web_refs(e),
             ]
         else:
             return toplevel[
@@ -501,6 +516,7 @@ class APAStyle(BaseStyle):
                 self.format_date(e),
                 sentence[field('institution')],
                 sentence[optional_field('note')],
+                self.format_web_refs(e),
             ]
 
     def get_unpublished_template(self, e):
@@ -510,10 +526,12 @@ class APAStyle(BaseStyle):
                 self.format_date(e),
                 self.format_btitle(e, 'title'),
                 sentence[field('note')],
+                self.format_web_refs(e),
             ]
         else:
             return toplevel[
                 self.format_btitle(e, 'title'),
                 self.format_date(e),
                 sentence[field('note')],
+                self.format_web_refs(e),
             ]
