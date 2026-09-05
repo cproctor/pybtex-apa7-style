@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pybtex-apa7-style"
-version = "0.1.3"
+version = "0.1.4"
 description = "Provides APA7 style for Pybtex"
 readme = "README.md"
 authors = ["Chris Proctor <github.com@accounts.chrisproctor.net>"]
