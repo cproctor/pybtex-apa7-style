@@ -31,6 +31,28 @@ def bib_to_apa7_html(bibfile):
     return "<br>".join(entry.text.render(HTML) for entry in formatted_bib)
 ```
 
+### Other output formats
+
+`APA.format_bibliography(...)` returns Pybtex's own rich-text representation, which is
+independent of any particular output format. Rendering to HTML above is just one choice;
+swap in a different [Pybtex backend](https://docs.pybtex.org/api/styles.html) to get
+plaintext, Markdown, or LaTeX output instead:
+
+```python3
+TXT = find_plugin('pybtex.backends', 'text')()
+MD = find_plugin('pybtex.backends', 'markdown')()
+LATEX = find_plugin('pybtex.backends', 'latex')()
+
+entry.text.render(TXT)    # 'Ackermann, E. (2001). ...'
+entry.text.render(MD)     # 'Ackermann, E\\. \\(2001\\)\\. ...'
+entry.text.render(LATEX)  # 'Ackermann, E. (2001). ...'
+```
+
+The Markdown backend escapes characters like `.`, `(`, and `)` that are meaningful in
+Markdown syntax, which is correct behavior for a Markdown *renderer* but can look noisy
+if you only want plain text. If you just want plaintext, prefer the `text` backend over
+`markdown`.
+
 ## Contributing
 
 This is a work in progres; APA style is not fully-specified and has endless edge cases. 
