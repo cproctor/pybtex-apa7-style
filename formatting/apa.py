@@ -148,13 +148,47 @@ class APAStyle(BaseStyle):
         else:
             return formatted_title
 
+    def resolve_web_ref(self, e, which_field):
+        """
+        Returns the URL that `format_url`/`format_eprint`/`format_pubmed`/
+        `format_doi` would generate for `which_field`, or None if the field
+        isn't present. Used to detect when the same URL is duplicated across
+        multiple identifier fields (common in Zotero exports, where `url`,
+        `eprint`, and `doi` sometimes all end up holding the same DOI link).
+        """
+        value = e.fields.get(which_field)
+        if not value:
+            return None
+        value = value.strip()
+        if which_field == 'url':
+            return value
+        if which_field == 'doi':
+            return 'https://doi.org/' + value
+        if which_field == 'pubmed':
+            return 'https://www.ncbi.nlm.nih.gov/pubmed/' + value
+        if which_field == 'eprint':
+            # Some exports (e.g. Zotero) put a full URL in `eprint` instead
+            # of a bare arXiv id; don't mangle it into a broken arxiv.org
+            # link if it's already absolute.
+            if re.match(r'^https?://', value):
+                return value
+            return 'https://arxiv.org/abs/' + value
+        return None
+
     def format_web_refs(self, e):
-        return sentence(add_period=False)[
-            optional[self.format_url(e)],
-            optional[self.format_eprint(e)],
-            optional[self.format_pubmed(e)],
-            optional[self.format_doi(e)],
-        ]
+        doi_url = self.resolve_web_ref(e, 'doi')
+        refs = []
+        for which_field, formatter in [
+            ('url', self.format_url),
+            ('eprint', self.format_eprint),
+            ('pubmed', self.format_pubmed),
+        ]:
+            resolved = self.resolve_web_ref(e, which_field)
+            if resolved and resolved == doi_url:
+                continue  # duplicates the DOI link; skip it
+            refs.append(optional[formatter(e)])
+        refs.append(optional[self.format_doi(e)])
+        return sentence(add_period=False)[refs]
 
     def format_url(self, e):
         return words[
@@ -190,6 +224,16 @@ class APAStyle(BaseStyle):
         ]
 
     def format_eprint(self, e):
+        value = e.fields.get('eprint', '').strip()
+        if re.match(r'^https?://', value):
+            # already a full URL; don't prepend the arxiv.org prefix
+            return href[
+                field('eprint', raw=True),
+                join[
+                    'arXiv:',
+                    field('eprint', raw=True)
+                ]
+            ]
         return href[
             join[
                 'https://arxiv.org/abs/',
