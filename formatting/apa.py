@@ -10,6 +10,11 @@ from pybtex.richtext import Text, Symbol
 
 firstlast = find_plugin('pybtex.style.names', 'firstlast')()
 
+MONTH_NAMES = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December',
+]
+
 def format_pages(text):
     dash_re = re.compile(r'-+')
     pages = Text(Symbol('ndash')).join(text.split(dash_re))
@@ -18,7 +23,53 @@ def format_pages(text):
     return Text("p.", Symbol('nbsp'), pages)
 
 pages = field('pages', apply_func=format_pages)
-date = words[field('year'), optional[", ", field('month')]]
+
+def parse_iso_date(value):
+    """
+    Parses a Zotero/bibtex-style ISO date string ("YYYY", "YYYY-MM", or
+    "YYYY-MM-DD") into (year, month name, day) parts. Any part not present
+    in `value` is returned as None.
+    """
+    if not value:
+        return None, None, None
+    match = re.match(r'^\s*(\d{4})(?:-(\d{2}))?(?:-(\d{2}))?', str(value))
+    if not match:
+        return None, None, None
+    year, month, day = match.groups()
+    month_name = MONTH_NAMES[int(month) - 1] if month else None
+    day_num = str(int(day)) if day else None
+    return year, month_name, day_num
+
+@node
+def apa_date(children, context, **kwargs):
+    """
+    Formats a date with whatever granularity is available: year, year and
+    month, or year, month, and day. Prefers explicit `year`/`month`/`day`
+    fields, but falls back to parsing a Zotero-style `date` field (e.g.
+    "2020-05-03") when those aren't present.
+    """
+    assert not children
+
+    fields = context['entry'].fields
+    year, month, day = fields.get('year'), fields.get('month'), fields.get('day')
+    if not year:
+        fallback_year, fallback_month, fallback_day = parse_iso_date(fields.get('date'))
+        year = year or fallback_year
+        month = month or fallback_month
+        day = day or fallback_day
+    if not year:
+        raise FieldIsMissing('year', context['entry'])
+    if day and day.isdigit():
+        day = str(int(day))  # normalize "05" -> "5"
+
+    if month and day:
+        return Text(f"{year}, {month} {day}")
+    elif month:
+        return Text(f"{year}, {month}")
+    else:
+        return Text(year)
+
+date = apa_date()
 
 @node
 def apa_names(children, context, role, **kwargs):
@@ -37,12 +88,12 @@ def apa_names(children, context, role, **kwargs):
     if len(persons) > 20:
         formatted_names = [style.format_name(
             person, style.abbreviate_names) for person in persons[:20]]
-        formatted_names += [richtext.Text("et al.")]
+        formatted_names += [Text("et al.")]
         return join(sep=', ')[formatted_names].format_data(context)
     else:
         formatted_names = [style.format_name(
             person, style.abbreviate_names) for person in persons]
-        return join(sep=', ', sep2=' & ', last_sep=', & ')[
+        return join(sep=', ', sep2=', & ', last_sep=', & ')[
             formatted_names].format_data(context)
 
 @node
